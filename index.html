@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>INSTRUMEN UMPAN BALIK & OBSERVASI REFLEKSI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* 🎨 FONDASI UMUM */
+    body {
+      background: #f6f7f8;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto;
+      color: #111827;
+      overflow: hidden; 
+      height: 100vh; 
+      margin: 0;
+    }
+
+    .app {
+      height: 100%; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 820px;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 8px 30px rgba(16, 24, 40, 0.06);
+      display: flex;
+      flex-direction: column; 
+      position: relative;
+      height: 100%; 
+      overflow: hidden; 
+    }
+
+    .topbar {
+      /* Statis (Fixed) di atas */
+      text-align: center;
+      padding: 14px 18px;
+      border-bottom: 1px solid #eef2f4;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 50;
+      flex-shrink: 0; 
+    }
+
+    /* ... (CSS untuk .title, .scale-info, .header-stats, .stat-box, dll. tetap sama) ... */
+    .title {
+      font-weight: 900;
+      color: #065f46;
+      font-size: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .scale-info {
+      font-size: 10px;
+      color: #6b7280;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 8px;
+      margin-left: -1px;
+      margin-right: 20px;
+    }
+
+    .stat-box {
+      background: rgba(209, 250, 229, 0.4);
+      border-radius: 10px;
+      padding: 14px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      height: 90px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .avg-box {
+      flex: 0 0 20%;
+    }
+
+    .analysis-box {
+      flex: 0 0 80%;
+    }
+
+    .avg-label, .analysis-title {
+      font-size: 20px;
+      color: #f89a4d;
+    }
+
+    .avg-value {
+      font-weight: 980;
+      color: #065f46;
+      font-size: 30px;
+    }
+
+    .analysis-text {
+      font-weight: 700;
+      color: #065f46;
+      font-size: 16px;
+      text-align: left;
+      line-height: 1.4;
+    }
+    .analysis-text div {
+      margin-bottom: 2px;
+    }
+
+    .footer {
+      /* FIX 1: Padding vertikal dikurangi agar tombol lebih terlihat di mobile */
+      padding: 55px 0px; /* Padding vertikal 6px, horizontal 0 (diambil dari margin tombol) */
+      border-top: 0px solid #eef2f4;
+      display: flex;
+      justify-content: center; 
+      align-items: center;
+      background: white;
+      z-index: 100;
+      border-radius: 0 0 14px 14px;
+      flex-shrink: 0; 
+    }
+
+    .content {
+      flex: 1 1 auto; 
+      display: flex;
+      flex-direction: column; 
+      align-items: center;
+      padding: 0;
+      overflow-y: auto; 
+      position: relative; 
+    }
+    
+    .container-soft {
+      background: rgba(209,250,229,0.4);
+      border-radius: 14px;
+      padding: 1px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      width: 100%;
+      max-width: 720px;
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding-bottom: 5px; 
+      padding-top: 1px;
+      margin-top: 1px;
+      margin-bottom: 20px; 
+      overflow: visible; 
+    }
+    
+    #intro-container, #reflection-container, #summary-container, #main-container {
+        padding-top: 0; 
+        margin-top: 0;
+    }
+    
+    #intro-container {
+        height: 73%; 
+        align-items: center; 
+        justify-content: flex-start;
+        margin-top: 10px;
+    }
+    #page-intro {
+        width: 100%; 
+        max-width: 400px; 
+        padding: 20px;
+    }
+    
+    #questionBox > div,
+    #reflectionBox > div {
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      padding-top: 0; 
+    }
+    
+    /* Perataan teks pertanyaan rata kiri kanan (Justify) */
+    .question-desc {
+      text-align: justify;
+      text-justify: inter-word; 
+    }
+
+    /* ---------------------------------------------------- */
+    /* 🟢 NEUMORPHISM: KOLOM ISIAN (INPUT/TEXTAREA)         */
+    /* ---------------------------------------------------- */
+    #page-intro input, 
+    #fb16, #fb17, #fb18, 
+    textarea.note,
+    textarea.bukti,
+    textarea.refleksi {
+        border: none !important; 
+        background: #f6f7f8 !important;
+        box-shadow: inset 4px 4px 8px #c5c9cd, inset -4px -4px 8px #ffffff;
+        transition: all 0.3s ease;
+        outline: none;
+        padding: 14px;
+        border-radius: 12px;
+        font-size: 16px;
+        margin-top: 5px;
+        width: 100%; 
+    }
+    /* Style untuk fokus */
+    #page-intro input:focus, 
+    #fb16:focus, #fb17:focus:focus, #fb18:focus, 
+    textarea.note:focus,
+    textarea.bukti:focus,
+    textarea.refleksi:focus {
+        box-shadow: inset 2px 2px 4px #c5c9cd, inset -2px -2px 4px #ffffff, 0 0 0 2px #065f4680; 
+    }
+    
+    #fb16, #fb17, #fb18 {
+      height: 70px; 
+      font-size: 14px;
+    }
+    textarea.note {
+      height: 120px;
+      font-size: 14px;
+    }
+
+    textarea.bukti, textarea.refleksi {
+        height: 100px;
+        font-size: 14px;
+    }
+    
+    #page-intro input {
+        height: 50px;
+        margin-bottom: 12px;
+    }
+
+    /* ---------------------------------------------------- */
+    /* 🟢 NEUMORPHISM: TOMBOL SKALA (1, 2, 3, 4)           */
+    /* ---------------------------------------------------- */
+    .scales {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px; 
+      margin-bottom: 15px;
+    }
+    
+    .scale-btn {
+      flex: 1;
+      padding: 10px 0;
+      border-radius: 10px;
+      border: none;
+      background: #f6f7f8;
+      font-weight: 700;
+      color: #111827;
+      cursor: pointer;
+      box-shadow: 4px 4px 8px #d1d5db, -4px -4px 8px #ffffff;
+      transition: all 0.2s ease-out;
+    }
+
+    .scale-btn:active {
+      transform: scale(.97);
+      box-shadow: inset 3px 3px 6px #c5c9cd, inset -3px -3px 6px #ffffff;
+    }
+
+    .scale-btn.selected {
+      background: #a7f3d0 !important;
+      color: #065f46;
+      box-shadow: 4px 4px 8px #9c9c9c, -4px -4px 8px #ffffff;
+      transform: scale(1.0);
+    }
+    
+    /* ---------------------------------------------------- */
+    /* 🧱 STYLING TOMBOL UTAMA (START/SIMPAN/CETAK)         */
+    /* ---------------------------------------------------- */
+    #btnStart, #btnStartRefl, #btnSave, #modalPrintBtn, #btnSaveRefl {
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease-out;
+      border: none;
+      background: #065f46;
+      color: white;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+      padding: 12px 24px;
+      border-radius: 12px;
+    }
+    
+    #btnSave, #modalPrintBtn, #btnSaveRefl {
+      padding: 10px 20px;
+      border-radius: 10px;
+    }
+    
+    #btnStart:active, #btnStartRefl:active, #btnSave:active, #modalPrintBtn:active, #btnSaveRefl:active {
+        box-shadow: none;
+        transform: scale(0.98);
+        background: #047857;
+    }
+
+    #btnStartRefl {
+        background: #f89a4d;
+    }
+    #btnStartRefl:active {
+        background: #e98a3d;
+    }
+    
+    .footer-center {
+      font-size: 12px;
+      color: #9ca3af;
+      font-style: italic;
+    }
+
+    /* Styling Panah Navigasi */
+    .nav-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e5e7eb; 
+        color: #4b5563; 
+        font-size: 20px;
+        font-weight: 900;
+        cursor: pointer;
+        box-shadow: 2px 2px 4px #c5c9cd, -2px -2px 4px #ffffff;
+        transition: all 0.2s ease-out;
+        user-select: none;
+    }
+    .nav-btn:active {
+        box-shadow: inset 2px 2px 4px #c5c9cd, inset -2px -2px 4px #ffffff;
+        transform: scale(0.95);
+    }
+    .nav-btn:hover {
+        background: #d1d5db;
+    }
+    .nav-back::before {
+        content: '«'; 
+        font-size: 30px;
+        line-height: 1;
+    }
+    .nav-next::before {
+        content: '»'; 
+        font-size: 30px;
+        line-height: 1;
+    }
+    
+    /* MODAL CSS */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    .modal-content {
+        background: #f6f7f8;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 10px 10px 20px #c5c9cd, -10px -10px 20px #ffffff;
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+    }
+    .modal-overlay.show .modal-content {
+        transform: scale(1);
+    }
+    .modal-content h3 {
+        color: #065f46;
+    }
+
+
+    /* PRINT FIXES */
+    @media print {
+      /* FIX 2: Print Margin diperlebar (dari 2cm menjadi 1.2cm) */
+      @page { size: A4; margin: 1cm 1.2cm; } 
+      
+      body { background: white; overflow: visible !important; }
+      .app, .card, .topbar, .footer, .content, .container-soft, #questionBox > div, #reflectionBox > div, .modal-content {
+        box-shadow: none !important;
+        background: white !important;
+        border: none !important;
+      }
+      .app { height: auto; }
+      .card { max-width: 100%; height: auto; overflow: visible !important; }
+      .content { overflow-y: visible !important; }
+      
+      /* Sembunyikan Navigasi di Print Mode */
+      .topbar, .footer, .note, .scales, #footer-actions-wrapper, .header-stats, #main-container, #intro-container, #summary-container, #reflection-container, #reflectionSummaryActions, .modal-overlay, #btnStartRefl, #btnStart {
+        display: none !important;
+      }
+      #print-content {
+        display: block !important;
+      }
+      
+      /* Optimasi ukuran font dan padding untuk cetak 2 halaman */
+      .main-table th, .main-table td { 
+          font-size: 9pt !important;
+          padding: 3px !important;
+      }
+      /* FIX 3: TIGHTENING SUMMARY ROWS IN PRINT */
+      .main-table tr:nth-last-child(-n+3) td {
+          padding: 2px 5px !important; /* Even tighter vertical padding for 16, 17, 18 */
+          line-height: 1.2;
+      }
+      .main-table tr:nth-last-child(-n+3) span {
+          display: block; 
+      }
+      
+      .meta-info table, .meta-info td {
+          font-size: 10pt !important;
+      }
+      .print-header div {
+          font-size: 10pt !important;
+      }
+      
+      p { margin-top: 2px !important; margin-bottom: 2px !important; }
+      
+      .signature-box { 
+          margin-top: 30px !important; 
+      }
+
+    }
+
+    @media(max-width:640px){
+      .title{font-size:16px}
+      .avg-value{font-size:22px}
+      .scale-btn{font-size:14px;padding:8px 0}
+      .stat-box { height: 80px; padding: 10px; }
+      .avg-label, .analysis-title { font-size: 11px; }
+      .analysis-text { font-size: 9px; }
+      #page-intro input { font-size: 14px; }
+      
+      /* Tambahan: Pastikan tombol navigasi tidak terlalu besar di mobile */
+      .nav-btn {
+          width: 36px;
+          height: 36px;
+      }
+      .nav-back::before, .nav-next::before {
+          font-size: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card">
+      <div class="topbar">
+        <div class="title">INSTRUMEN UMPAN BALIK & OBSERVASI REFLEKSI</div>
+        <div id="scale-info-ub" class="scale-info">1 = Hampir tidak ada • 2 = Sedikit • 3 = Cukup • 4 = Memadai</div>
+        <div id="header-stats-ub" class="header-stats">
+          <div class="stat-box avg-box">
+            <div class="avg-label">Skor</div>
+            <div id="avgValue" class="avg-value">0.00</div>
+          </div>
+          <div class="stat-box analysis-box">
+            <div class="analysis-title">Rekap Kategori</div>
+            <div id="analysisText" class="analysis-text"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div id="intro-container" class="container-soft" style="display:flex;">
+          <div id="page-intro" class="page active" data-page="intro">
+            <div class="intro-label text-green-700 font-bold text-lg mb-3 text-center">
+              Lengkapi Identitas sebelum memulai
+            </div>
+            <input id="inpPenyusun" type="text" placeholder="Masukkan nama penyusun perencanaan..." autocomplete="name"/>
+            <input id="inpPemberi" type="text" placeholder="Masukkan nama pemberi umpan balik/observer..." autocomplete="name"/>
+            <button id="btnStartRefl" class="mt-3 w-full max-w-xs mx-auto">
+              Mulai Observasi Refleksi
+            </button>
+            <button id="btnStart" class="mt-3 w-full max-w-xs mx-auto">
+              Mulai Umpan Balik
+            </button>
+          </div>
+        </div>
+
+
+        <div id="main-container" class="container-soft" style="display:none;">
+          <div id="page-question" class="page active" data-page="question">
+            <div id="questionBox" class="w-full mt-2"></div>
+          </div>
+        </div>
+
+        <div id="summary-container" class="container-soft" style="display:none;">
+          <div id="page-summary" class="page active" data-page="summary">
+            <div class="summary-title font-bold text-green-700 text-lg mb-3">
+              Kesimpulan & Tindak Lanjut Umpan Balik
+            </div>
+
+            <label class="text-green-700 font-semibold text-sm">16. Kelebihan Perencanaan</label>
+            <textarea id="fb16" placeholder="Kelebihan Perencanaan"></textarea>
+
+            <label class="text-orange-500 font-semibold text-sm">17. Hal yang perlu ditingkatkan</label>
+            <textarea id="fb17" placeholder="Hal yang perlu ditingkatkan"></textarea>
+
+            <label class="text-blue-600 font-semibold text-sm">18. Rekomendasi Perbaikan</label>
+            <textarea id="fb18" placeholder="Rekomendasi Perbaikan"></textarea>
+          </div>
+        </div>
+        
+        <div id="reflection-container" class="container-soft" style="display:none;">
+            <div id="page-reflection" class="page active" data-page="reflection">
+                <div id="reflectionBox" class="w-full mt-2"></div>
+            </div>
+        </div>
+        
+        <div id="print-content" style="display:none;"></div>
+      </div>
+
+      <div class="footer">
+        <div id="footer-actions-wrapper" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div id="btnBack" class="nav-btn nav-back" style="visibility: hidden; margin-left: 16px;"></div> 
+            
+            <div id="action-center-group" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                <div id="reflectionSummaryActions" style="display: none; gap: 8px;">
+                    <button id="btnSaveRefl" class="text-base">SIMPAN</button>
+                </div>
+                <div id="summaryActions" style="display: none; gap: 8px;">
+                    <button id="btnSave" class="text-base">SIMPAN</button>
+                </div>
+                <div class="footer-center">@ by. Ande Sofiani</div>
+            </div>
+
+            <div id="btnNext" class="nav-btn nav-next" style="display: block; margin-right: 16px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="analysisModal" class="modal-overlay" style="display:none;">
+    <div id="modalContent" class="modal-content">
+        </div>
+  </div>
+  <script>
+    const aspects = [
+      {no:1,kategori:'Keselarasan',aspek:'Tujuan pembelajaran, langkah pembelajaran, dan asesmen pembelajaran sudah mengarah pada pencapaian Dimensi Profil Lulusan.'},
+      {no:2,kategori:'Keselarasan',aspek:'Tujuan pembelajaran, langkah pembelajaran, dan asesmen pembelajaran sudah selaras.'},
+      {no:3,kategori:'Kerangka Pembelajaran',aspek:'Praktik pedagogis yang dituliskan sudah tergambar pada langkah pembelajaran dan/atau asesmen pembelajaran.'},
+      {no:4,kategori:'Kerangka Pembelajaran',aspek:'Lingkungan belajar yang dituliskan sudah tergambar pada langkah pembelajaran dan/atau asesmen pembelajaran.'},
+      {no:5,kategori:'Kerangka Pembelajaran',aspek:'Kemitraan pembelajaran yang dituliskan sudah tergambar pada langkah pembelajaran dan/atau asesmen pembelajaran.'},
+      {no:6,kategori:'Kerangka Pembelajaran',aspek:'Pemanfaatan digital yang dituliskan sudah tergambar pada langkah pembelajaran dan/atau asesmen pembelajaran.'},
+      {no:7,kategori:'Langkah Pembelajaran',aspek:'Langkah pembelajaran memfasilitasi pengalaman belajar MEMAHAMI.'},
+      {no:8,kategori:'Langkah Pembelajaran',aspek:'Langkah pembelajaran memfasilitasi pengalaman belajar MENGAPLIKASI.'},
+      {no:9,kategori:'Langkah Pembelajaran',aspek:'Langkah pembelajaran memfasilitasi pengalaman belajar MEREFLEKSI.'},
+      {no:10,kategori:'Langkah Pembelajaran',aspek:'Langkah perencanaan memfasilitasi tindakan saling MEMULIAKAN.'},
+      {no:11,kategori:'Langkah Pembelajaran',aspek:'Prinsip pembelajaran mendalam tergambar pada langkah pembelajaran.'},
+      {no:12,kategori:'Langkah Pembelajaran',aspek:'Perencanaan mengakomodir karakteristik murid.'},
+      {no:13,kategori:'Asesmen',aspek:'Perencanaan memuat asesmen yang digunakan untuk memberikan umpan balik guna memperbaiki proses pembelajaran.'},
+      {no:14,kategori:'Asesmen',aspek:'Perencanaan memuat asesmen yang dapat mengukur ketercapaian tujuan pembelajaran sesuai karakteristik murid.'},
+      {no:15,kategori:'Asesmen',aspek:'Asesmen sudah memiliki kriteria yang jelas dalam mengukur ketercapaian tujuan pembelajaran.'}
+    ];
+    
+    // Aspek Observasi dan Refleksi
+    const reflectionAspects = [
+      { no: 1, kategori: 'Keselarasan', aspek: 'Tindakan implementasi perencanaan selaras dengan perencanaan pembelajaran pada:', subAspek: ['awal pembelajaran', 'inti pembelajaran dalam proses memahami, mengaplikasi, dan merefleksi', 'penutupan pembelajaran'] },
+      { no: 2, kategori: 'Keselarasan', aspek: 'Upaya mencapai tujuan pembelajaran menuju pencapaian dimensi profil lulusan selaras dengan perencanaan pembelajaran' },
+      { no: 3, kategori: 'Implementasi Kerangka Pembelajaran', aspek: 'Praktik pedagogis yang diimplementasikan sudah tergambar pada langkah pembelajaran dan/atau asesmen pembelajaran' },
+      { no: 4, kategori: 'Implementasi Kerangka Pembelajaran', aspek: 'Lingkungan belajar yang diimplementasikan sudah tergambar pada langkah pembelajaran dan/atau asesmen pembelajaran' },
+      { no: 5, kategori: 'Implementasi Kerangka Pembelajaran', aspek: 'Kemitraan pembelajaran yang diimplementasikan sudah tergambar pada langkah pembelajaran dan/atau asesmen pembelajaran' },
+      { no: 6, kategori: 'Implementasi Kerangka Pembelajaran', aspek: 'Pemanfaatan digital yang diimplementasikan sudah tergambar pada langkah pembelajaran dan/atau asesmen pembelajaran' },
+      { no: 7, kategori: 'Langkah Pembelajaran', aspek: 'Langkah pembelajaran yang dilakukan sesuai perencanaan dapat memfasilitasi tindakan saling MEMULIAKAN antara Guru-Murid, Murid-Guru, Murid-Murid yang tercermin dalam bahasa verbal dan nonverbal' },
+      { no: 8, kategori: 'Langkah Pembelajaran', aspek: 'Langkah pembelajaran sudah memfasilitasi murid untuk merasakan pengalaman belajar MEMAHAMI (terlibat aktif mengonstruksi pengetahuan agar dapat memahami secara mendalam konsep atau materi dari berbagai sumber dan konteks).' },
+      { no: 9, kategori: 'Langkah Pembelajaran', aspek: 'Langkah pembelajaran sudah memfasilitasi murid untuk merasakan pengalaman belajar MENGAPLIKASI (mengaplikasi pemahaman secara kontekstual dalam kehidupan nyata sebagai bagian dari pendalaman pengetahuan)' },
+      { no: 10, kategori: 'Langkah Pembelajaran', aspek: 'Langkah pembelajaran sudah memfasilitasi murid untuk merasakan pengalaman belajar MEREFLEKSI (mengevaluasi dan memaknai proses serta hasil dari tindakan atau praktik nyata yang telah mereka lakukan dan menentukan tindaklanjut ke depan; serta mengelola proses belajarnya secara mandiri).' },
+      { no: 11, kategori: 'Langkah Pembelajaran', aspek: 'Prinsip pembelajaran mendalam berupa berkesadaran, bermakna, dan/atau menggembirakan sudah tergambar pada setiap pengalaman belajar di langkah pembelajaran yang diimplementasikan.' },
+      { no: 12, kategori: 'Langkah Pembelajaran', aspek: 'Praktik pembelajaran sudah mengakomodir pengalaman belajar yang sesuai dengan karakteristik murid (umur, tingkat perkembangan, kemampuan, bakat dan minat, gaya belajar, dll.)' },
+      { no: 13, kategori: 'Asesmen', aspek: 'Praktik Pembelajaran sudah melakukan asesmen untuk memberikan umpan balik guna memperbaiki proses pembelajaran.' },
+      { no: 14, kategori: 'Asesmen', aspek: 'Praktik Pembelajaran sudah melakukan asesmen untuk mengukur ketercapaian tujuan pembelajaran sesuai karakteristik murid' },
+      { no: 15, kategori: 'Asesmen', aspek: 'Asesmen sudah dilakukan berdasarkan kriteria yang jelas dalam mengukur ketercapaian tujuan pembelajaran' },
+      { no: 16, kategori: 'Refleksi', aspek: 'Pelajaran apa yang telah diperoleh dari Implementasi Perencanaan Pembelajaran yang telah dilakukan beserta faktor-faktor pendukungnya?' },
+      { no: 17, kategori: 'Refleksi', aspek: 'Hal-hal apa saja yang pencapaiannya belum memuaskan dari Implementasi Perencanaan Pembelajaran yang telah dilakukan beserta faktor-faktor penghambatnya?' },
+      { no: 18, kategori: 'Refleksi', aspek: 'Rencana tindak lanjut apa yang akan dibuat untuk perbaikan ke depan?Selanjutnya:' }
+    ];
+
+
+    let page = 'intro', mode = 'umpanBalik', index = 0;
+    const scores = {}, notes = {};
+    const reflectionData = {}; // { index: { bukti: '', catatan: '' } }
+
+    const pages = document.querySelectorAll('.page'),
+          btnStart = document.getElementById('btnStart'),
+          btnStartRefl = document.getElementById('btnStartRefl'), 
+          btnBack = document.getElementById('btnBack'), // Diambil dari footer
+          btnNext = document.getElementById('btnNext'), // Diambil dari footer
+          questionBox = document.getElementById('questionBox'),
+          reflectionBox = document.getElementById('reflectionBox'), 
+          avgValue = document.getElementById('avgValue'),
+          analysisText = document.getElementById('analysisText'),
+          headerStatsUB = document.getElementById('header-stats-ub'),
+          scaleInfoUB = document.getElementById('scale-info-ub'),
+          reflectionSummaryActions = document.getElementById('reflectionSummaryActions'), // Diambil dari footer
+          summaryActions = document.getElementById('summaryActions'), // Diambil dari footer
+          footerActionsWrapper = document.getElementById('footer-actions-wrapper'); // Wrapper baru di footer
+
+          
+    const btnSave = document.getElementById('btnSave');
+    const btnSaveRefl = document.getElementById('btnSaveRefl');
+    const inpPenyusun = document.getElementById('inpPenyusun');
+    const inpPemberi = document.getElementById('inpPemberi');
+    const fb16 = document.getElementById('fb16');
+    const fb17 = document.getElementById('fb17');
+    const fb18 = document.getElementById('fb18');
+    const printContent = document.getElementById('print-content');
+    const analysisModal = document.getElementById('analysisModal');
+    const modalContent = document.getElementById('modalContent');
+
+
+    function fadeTo(targetPage){
+      pages.forEach(p=>p.classList.remove('active'));
+      const target=document.getElementById(`page-${targetPage}`);
+      target.classList.add('active');
+      page=targetPage;
+      
+      const isUBSummary = targetPage === 'summary';
+
+      // Kontrol Navigasi & Aksi
+      footerActionsWrapper.style.display = targetPage !== 'intro' ? 'flex' : 'none'; // Tampilkan/Sembunyikan seluruh action wrapper
+      btnNext.style.display = 'block';
+      summaryActions.style.display = 'none';
+      reflectionSummaryActions.style.display = 'none';
+      // PERBAIKAN: Set btnBack ke visible secara default di sini, visibilitas hidden/visible berdasarkan index diatur di renderQuestion/renderReflectionQuestion
+      btnBack.style.visibility = 'visible'; 
+
+      if (isUBSummary) {
+        btnNext.style.display = 'none';
+        summaryActions.style.display = 'flex';
+        btnBack.style.visibility = 'hidden'; // Tidak bisa back dari summary, hanya bisa print/save
+      } else if (targetPage === 'reflection') {
+        // Logika untuk halaman refleksi/observasi (seperti halaman pertanyaan)
+        if (index === reflectionAspects.length - 1) {
+            btnNext.style.display = 'none';
+            reflectionSummaryActions.style.display = 'flex';
+        }
+      } else if (targetPage === 'intro') {
+          btnBack.style.visibility = 'hidden';
+          footerActionsWrapper.style.display = 'none';
+      }
+      
+      updateHeaderVisibility(mode);
+    }
+    
+    function updateHeaderVisibility(currentMode) {
+        if (currentMode === 'umpanBalik') {
+            headerStatsUB.style.display = 'flex';
+            scaleInfoUB.style.display = 'block';
+            document.querySelector('.title').textContent = 'INSTRUMEN UMPAN BALIK PERENCANAAN PEMBELAJARAN';
+        } else {
+            headerStatsUB.style.display = 'none';
+            scaleInfoUB.style.display = 'none';
+            document.querySelector('.title').textContent = 'INSTRUMEN OBSERVASI & REFLEKSI';
+        }
+    }
+
+
+    function getColor(k){
+      switch(k){
+        case'Keselarasan':return'rgba(209,250,229,0.4)';
+        case'Kerangka Pembelajaran':return'rgba(191,219,254,0.4)';
+        case'Langkah Pembelajaran':return'rgba(254,249,195,0.4)';
+        case'Asesmen':return'rgba(254,226,226,0.4)';
+        case'Implementasi Kerangka Pembelajaran':return'rgba(191,219,254,0.4)';
+        case'Refleksi':return'rgba(254,226,226,0.4)';
+        default:return'rgba(255,255,255,0.4)';
+      }
+    }
+
+    function renderQuestion(){
+      const a = aspects[index];
+      questionBox.innerHTML = '';
+
+      const displayIndex = index + 1;
+
+      const container = document.createElement('div');
+      container.style.background = getColor(a.kategori);
+      container.style.opacity = '0';
+      container.style.transition = 'opacity 0.3s ease';
+      setTimeout(()=>container.style.opacity = '1',20);
+
+      const topMeta = document.createElement('div');
+      topMeta.className = 'flex justify-between text-sm text-gray-600 font-medium';
+      topMeta.innerHTML = `<span>${displayIndex}. ${a.kategori}</span><span class="text-xs text-gray-400">Aspek ${displayIndex}/${aspects.length}</span>`;
+
+      const desc = document.createElement('div');
+      desc.className = 'text-base font-semibold text-gray-900 my-2 question-desc';
+      desc.textContent = a.aspek;
+
+      const scales = document.createElement('div');
+      scales.className = 'scales';
+      [1,2,3,4].forEach(s=>{
+        const b = document.createElement('button');
+        b.className = 'scale-btn';
+        b.textContent = s;
+        if (scores[index] === s) b.classList.add('selected');
+        b.onclick = () => {
+          scores[index] = s;
+          if(navigator.vibrate) navigator.vibrate(10);
+          renderQuestion();
+          updateSummaryStats();
+        };
+        scales.appendChild(b);
+      });
+
+      const note = document.createElement('textarea');
+      note.className = 'note';
+      note.placeholder = 'Catatan opsional (Contoh: "Murid perlu bimbingan lebih pada bagian X")';
+      note.value = notes[index] || '';
+      note.oninput = () => notes[index] = note.value;
+
+      container.append(topMeta, desc, scales, note);
+      questionBox.appendChild(container);
+      updateSummaryStats();
+      
+      // Update navigasi saat render
+      if (index === aspects.length - 1) {
+          btnNext.style.display = 'block'; // Di halaman terakhir, Next mengarah ke Summary
+          summaryActions.style.display = 'none'; // Pastikan tombol SIMPAN Summary tidak muncul di sini
+      } else {
+          btnNext.style.display = 'block';
+      }
+      
+      // PERBAIKAN: Tombol Back hanya terlihat jika index > 0
+      btnBack.style.visibility = index > 0 ? 'visible' : 'hidden'; 
+    }
+    
+    // Render Reflection Question
+    function renderReflectionQuestion() {
+        const a = reflectionAspects[index];
+        reflectionBox.innerHTML = '';
+        if (!reflectionData[index]) reflectionData[index] = { bukti: '', catatan: '' };
+
+        const displayIndex = index + 1;
+        const isRefleksiSection = displayIndex >= 16;
+        
+        const container = document.createElement('div');
+        container.style.background = getColor(a.kategori);
+        container.style.opacity = '0';
+        container.style.transition = 'opacity 0.3s ease';
+        setTimeout(()=>container.style.opacity = '1',20);
+
+        const topMeta = document.createElement('div');
+        topMeta.className = 'flex justify-between text-sm text-gray-600 font-medium pt-3';
+        topMeta.innerHTML = `<span>${displayIndex}. ${a.kategori}</span><span class="text-xs text-gray-400">Aspek ${displayIndex}/${reflectionAspects.length}</span>`;
+
+        const desc = document.createElement('div');
+        desc.className = 'text-base font-semibold text-gray-900 my-2 question-desc';
+        desc.textContent = a.aspek;
+        
+        container.append(topMeta, desc);
+        
+        // Input untuk Bukti Pembelajaran (Jika bukan bagian Refleksi)
+        if (!isRefleksiSection) {
+            const buktiLabel = document.createElement('label');
+            buktiLabel.className = 'text-green-700 font-semibold text-sm mt-3';
+            buktiLabel.textContent = 'Bukti Pembelajaran';
+            
+            const bukti = document.createElement('textarea');
+            bukti.className = 'bukti';
+            bukti.placeholder = 'Contoh: Terlihat saat guru memberikan contoh yang relevan...';
+            bukti.value = reflectionData[index].bukti || '';
+            bukti.oninput = () => reflectionData[index].bukti = bukti.value;
+            
+            container.append(buktiLabel, bukti);
+        }
+
+        // Input untuk Catatan
+        const catatanLabel = document.createElement('label');
+        catatanLabel.className = (isRefleksiSection ? 'text-blue-600' : 'text-gray-700') + ' font-semibold text-sm mt-3';
+        catatanLabel.textContent = isRefleksiSection ? 'Refleksi' : 'Catatan';
+        
+        const catatan = document.createElement('textarea');
+        catatan.className = 'refleksi';
+        catatan.placeholder = isRefleksiSection ? 'Tuliskan poin refleksi Anda di sini.' : 'Tuliskan catatan Anda di sini.';
+        catatan.value = reflectionData[index].catatan || '';
+        catatan.oninput = () => reflectionData[index].catatan = catatan.value;
+        
+        container.append(catatanLabel, catatan);
+
+        reflectionBox.appendChild(container);
+        
+        // Update footer action
+        if (displayIndex === reflectionAspects.length) {
+            btnNext.style.display = 'none'; // Tombol Next hilang
+            reflectionSummaryActions.style.display = 'flex'; // Gantikan dengan tombol SIMPAN
+        } else {
+            btnNext.style.display = 'block';
+            reflectionSummaryActions.style.display = 'none';
+        }
+        
+        // PERBAIKAN: Tombol Back hanya terlihat jika index > 0
+        btnBack.style.visibility = index > 0 ? 'visible' : 'hidden'; 
+    }
+
+
+    function updateSummaryStats(){
+      const catMap = {};
+      aspects.forEach((a, i) => {
+        if (!catMap[a.kategori]) catMap[a.kategori] = [];
+        if (typeof scores[i] !== 'undefined' && scores[i] !== null) {
+          catMap[a.kategori].push(scores[i]);
+        }
+      });
+
+      const catStats = Object.keys(catMap).map(k => {
+        const arr = catMap[k];
+        const avg = arr.length ? (arr.reduce((x, y) => x + y, 0) / arr.length) : 0;
+        return { kategori: k, avg };
+      });
+
+      const vals = Object.values(scores).filter(v => typeof v === 'number');
+      const overall = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
+      avgValue.textContent = overall.toFixed(2);
+
+      if (catStats.length > 0) {
+        let html = "";
+        catStats.forEach((c, i) => {
+          html += `<div>${i + 1}. ${c.kategori} (${c.avg.toFixed(2)})</div>`;
+        });
+        analysisText.innerHTML = html;
+      } else {
+        analysisText.textContent = "Belum ada data";
+      }
+    }
+
+    function generateDeepLearningAnalysis(score) {
+        const s = parseFloat(score);
+        let analysis = "";
+        let category = "";
+
+        if (s >= 3.51) {
+            category = "Sangat Memadai";
+            analysis = "Skor ini menunjukkan bahwa **Pembelajaran Mendalam (PM) telah terintegrasi secara unggul** dalam hampir semua aspek perencanaan. Perencanaan ini sangat efektif dalam memfasilitasi murid untuk mencapai dimensi **Profil Lulusan**.";
+        } else if (s >= 2.51) {
+            category = "Memadai";
+            analysis = "Skor ini menunjukkan bahwa **Pembelajaran Mendalam (PM) telah cukup terintegrasi** dalam perencanaan. Meskipun sudah baik, ada beberapa area yang bisa ditingkatkan untuk memaksimalkan pengalaman belajar yang lebih mendalam.";
+        } else if (s >= 1.51) {
+            category = "Kurang Memadai";
+            analysis = "Skor ini menunjukkan bahwa **integrasi Pembelajaran Mendalam (PM) perlu ditingkatkan**. Fokus lebih lanjut diperlukan untuk memastikan tujuan, langkah, dan asesmen secara konsisten mendukung pengalaman memahami, mengaplikasi, merefleksi, dan memuliakan.";
+        } else {
+            category = "Hampir Tidak Ada";
+            analysis = "Skor ini menunjukkan **integrasi Pembelajaran Mendalam (PM) belum terlihat secara signifikan**. Disarankan untuk meninjau kembali perencanaan agar lebih selaras dengan prinsip-prinsip pembelajaran mendalam.";
+        }
+        
+        const fullText = `Analisis Perencanaan Pembelajaran Mendalam (Rata-rata Skor: ${score})
+Kategori: ${category}
+${analysis}`;
+        
+        return { category, analysis, fullText };
+    }
+
+    function resetApp() {
+        inpPenyusun.value = '';
+        inpPemberi.value = '';
+        fb16.value = '';
+        fb17.value = '';
+        fb18.value = '';
+
+        for (const key in scores) delete scores[key];
+        for (const key in notes) delete notes[key];
+        for (const key in reflectionData) delete reflectionData[key];
+        index = 0;
+
+        document.getElementById('main-container').style.display = 'none';
+        document.getElementById('summary-container').style.display = 'none';
+        document.getElementById('reflection-container').style.display = 'none';
+        document.getElementById('intro-container').style.display = 'flex';
+        
+        mode = 'umpanBalik'; // Default mode
+        fadeTo('intro');
+        updateSummaryStats();
+    }
+
+    // Print Reflection Document
+    function printReflectionDocument() {
+        const penyusun = inpPenyusun.value || '______________________________';
+        const pemberi = inpPemberi.value || '______________________________';
+
+        let tableRows = '';
+        reflectionAspects.forEach((a, i) => {
+            const data = reflectionData[i] || { bukti: '', catatan: '' };
+            const bukti = data.bukti || '';
+            const catatan = data.catatan || '';
+            const isRefleksiSection = i >= 15; // Aspek 16 ke atas adalah Refleksi
+
+            tableRows += `
+                <tr>
+                    <td>${a.no}</td>
+                    <td style="text-align: justify;">${a.aspek}</td>
+                    <td style="text-align: left;">${isRefleksiSection ? 'Lihat kolom Catatan' : bukti}</td> 
+                    <td style="text-align: left;">${catatan}</td>
+                </tr>
+            `;
+        });
+
+        const signatureNameText = inpPemberi.value ? `${inpPemberi.value}` : '______________________________';
+
+        const printHtml = `
+            <style>
+                /* FIX 2: Print Margin diperlebar (dari 2cm menjadi 1.2cm) */
+                @page { size: A4; margin: 1cm 1.2cm; } 
+                body { font-family: 'Times New Roman', serif; font-size: 11pt; padding: 0; margin: 0; }
+                .print-header { text-align: center; margin-bottom: 5pt; } 
+                .print-header div { font-weight: bold; }
+                .meta-info { margin-bottom: 12pt; }
+                .meta-info table { width: 100%; border-collapse: collapse; }
+                .meta-info td:first-child { width: 35%; }
+                
+                .main-table { 
+                    width: 100%; 
+                    border-collapse: collapse; 
+                    table-layout: fixed; 
+                }
+                .main-table th { 
+                    background-color: #f0f0f0; 
+                    text-align: center;      
+                    vertical-align: middle;  
+                }
+                .main-table th, .main-table td { 
+                    border: 1px solid black; 
+                    padding: 3px; 
+                    vertical-align: top;
+                    font-size: 9pt; 
+                    word-wrap: break-word;
+                    height: auto !important; 
+                }
+                .main-table tr > td:nth-child(1) {
+                    text-align: center;
+                }
+                
+                .signature-box { 
+                    margin-top: 30px; 
+                    display: flex; 
+                    justify-content: flex-end; 
+                }
+                .signature-box div { 
+                    width: 250px; 
+                    text-align: center; 
+                    display: flex; 
+                    flex-direction: column; 
+                    align-items: center; 
+                }
+                .signature-line {
+                    border-bottom: 1px solid black; 
+                    width: 100%;
+                }
+            </style>
+            
+            <div style="padding: 0.5cm 1cm;"> 
+                <div class="print-header">
+                    <div>PELATIHAN KERJA ( ON-the JOB TRAINING /OJT) GURU</div>
+                    <div>INSTRUMEN OBSERVASI IMPLEMENTASI DAN REFLEKSI PERENCANAAN PEMBELAJARAN</div>
+                </div>
+                
+                <div class="meta-info">
+                    <table>
+                        <tr><td>Penyusun Perencanaan</td><td>: ${penyusun}</td></tr>
+                        <tr><td>Pemberi Umpan Balik</td><td>: ${pemberi}</td></tr>
+                    </table>
+                </div>
+
+                <p>Berikan umpan balik terhadap praktik yang telah dilakukan dengan menggunakan instrumen berikut!</p>
+
+                <table class="main-table">
+                    <colgroup>
+                        <col style="width: 7%;">
+                        <col style="width: 45%;">
+                        <col style="width: 28%;">
+                        <col style="width: 20%;">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th style="text-align: justify;">Aspek yang diamati</th>
+                            <th>Bukti Pembelajaran</th>
+                            <th>Catatan/Refleksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+
+                <div class="signature-box">
+                    <div style="width: 250px; text-align: center;">
+                        <div style="margin-bottom: 30px;">Pemberi Umpan Balik</div>
+                        <div style="font-weight: bold; font-size: 10pt;">${signatureNameText}</div> 
+                        <div class="signature-line"></div>
+                        <div style="font-size: 10pt; color: white;">.</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        printContent.innerHTML = printHtml;
+        window.print();
+        
+        analysisModal.style.display = 'none';
+        analysisModal.classList.remove('show');
+        resetApp(); 
+    }
+
+
+    function printDocument(analysisText) {
+      const penyusun = inpPenyusun.value || '______________________________';
+      const pemberi = inpPemberi.value || '______________________________';
+      
+      let tableRows = '';
+      aspects.forEach((a, i) => {
+        const score = scores[i] || 0;
+        // Catatan dibuat lebih ringkas saat dicetak
+        const note = notes[i] ? notes[i].substring(0, 150) + (notes[i].length > 150 ? '...' : '') : ''; 
+        const check = (s) => (score == s ? '✔' : '');
+        
+        tableRows += `
+          <tr>
+            <td>${a.no}</td>
+            <td style="text-align: justify;">${a.aspek}</td>
+            <td style="text-align: left;">${note}</td>
+            <td style="text-align:center;">${check(1)}</td>
+            <td style="text-align:center;">${check(2)}</td>
+            <td style="text-align:center;">${check(3)}</td>
+            <td style="text-align:center;">${check(4)}</td>
+          </tr>
+        `;
+      });
+      
+      // Gunakan colspan 7 untuk meratakan 3 kolom isian terakhir
+      // FIX 3: Baris ini akan lebih padat karena CSS baru
+      tableRows += `
+          <tr>
+              <td colspan="7" style="font-weight: bold; padding-left: 10px; text-align: left;">16. Kelebihan Perencanaan Pembelajaran: <span style="font-weight: normal;">${fb16.value}</span></td>
+          </tr>
+          <tr>
+              <td colspan="7" style="font-weight: bold; padding-left: 10px; text-align: left;">17. Hal yang perlu ditingkatkan dari Perencanaan Pembelajaran: <span style="font-weight: normal;">${fb17.value}</span></td>
+          </tr>
+          <tr>
+              <td colspan="7" style="font-weight: bold; padding-left: 10px; text-align: left;">18. Rekomendasi perbaikan Perencanaan Pembelajaran sesuai prinsip PM: <span style="font-weight: normal;">${fb18.value}</span></td>
+          </tr>
+      `;
+      
+      const analysisHtml = `
+          <div style="margin-top: 15px; border: 1px solid #ccc; padding: 8px; border-radius: 5px; page-break-before: auto;">
+              <h4 style="font-size: 10pt; font-weight: bold; margin-bottom: 5px; margin-top: 0;">Analisis Perencanaan Pembelajaran Mendalam</h4>
+              <p style="white-space: pre-wrap; margin: 0; font-size: 9pt;">${analysisText}</p>
+          </div>
+      `;
+      
+      const signatureNameText = inpPemberi.value ? `${inpPemberi.value}` : '______________________________';
+
+
+      const printHtml = `
+        <style>
+          /* FIX 2: Print Margin diperlebar (dari 2cm menjadi 1.2cm) */
+          @page { size: A4; margin: 1cm 1.2cm; } 
+          body { font-family: 'Times New Roman', serif; font-size: 11pt; padding: 0; margin: 0; }
+          .print-header { text-align: center; margin-bottom: 5pt; } 
+          .print-header div { font-weight: bold; font-size: 10pt; }
+          .meta-info { margin-bottom: 8pt; }
+          .meta-info table { width: 100%; border-collapse: collapse; }
+          .meta-info td:first-child { width: 35%; font-size: 10pt; }
+          .meta-info td:nth-child(2) { font-size: 10pt; }
+          
+          .main-table { 
+              width: 100%; 
+              border-collapse: collapse; 
+              table-layout: fixed; 
+          }
+          .main-table th { 
+            background-color: #f0f0f0; 
+            text-align: center;      
+            vertical-align: middle;  
+          }
+          .main-table th, .main-table td { 
+            border: 1px solid black; 
+            padding: 3px; 
+            vertical-align: top;
+            font-size: 9pt; 
+            word-wrap: break-word;
+          }
+          .main-table tr > td:nth-child(1) {
+              text-align: center;
+          }
+          /* FIX 3: TIGHTENING SUMMARY ROWS IN PRINT */
+          .main-table tr:nth-last-child(-n+3) td {
+              padding: 2px 5px !important; 
+              line-height: 1.2;
+          }
+          .main-table tr:nth-last-child(-n+3) span {
+              display: block; 
+          }
+          
+          .signature-box { 
+            margin-top: 30px; 
+            display: flex; 
+            justify-content: flex-end; 
+          }
+          .signature-box div { 
+            width: 250px; 
+            text-align: center; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+          }
+          .signature-line {
+              border-bottom: 1px solid black; 
+              width: 100%;
+          }
+        </style>
+        
+        <div style="padding: 0.5cm 1cm;"> 
+          <div class="print-header">
+            <div>PELATIHAN KERJA ( ON-the JOB TRAINING /OJT) GURU</div>
+            <div>INSTRUMEN UMPAN BALIK PERENCANAAN PEMBELAJARAN</div>
+          </div>
+          
+          <div class="meta-info">
+            <table>
+              <tr><td>Penyusun Perencanaan</td><td>: ${penyusun}</td></tr>
+              <tr><td>Pemberi Umpan Balik</td><td>: ${pemberi}</td></tr>
+            </table>
+          </div>
+
+          <p style="font-size: 10pt; margin-top: 5px;">Berikan umpan balik terhadap perencanaan yang telah dibuat dengan menggunakan instrumen berikut!</p>
+          <p style="margin-top: 0px; margin-bottom: 5px; font-size: 9pt;">Skala yang digunakan dalam menelaah: 1 = hampir tidak ada; 2 = sedikit dan lemah; 3 = cukup; 4 = memadai</p>
+
+          <table class="main-table">
+            <colgroup>
+              <col style="width: 7%;">
+              <col style="width: 45%;">
+              <col style="width: 25%;">
+              <col style="width: 5.75%;">
+              <col style="width: 5.75%;">
+              <col style="width: 5.75%;">
+              <col style="width: 5.75%;">
+            </colgroup>
+            <thead>
+              <tr>
+                <th rowspan="2">No.</th>
+                <th rowspan="2" style="text-align: justify;">Aspek yang diamati</th>
+                <th rowspan="2">Umpan balik</th>
+                <th colspan="4">Skala</th>
+              </tr>
+              <tr>
+                <th>1</th>
+                <th>2</th>
+                <th>3</th>
+                <th>4</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows}
+            </tbody>
+          </table>
+          
+          ${analysisHtml}
+
+          <div class="signature-box">
+              <div style="width: 250px; text-align: center;">
+                  <div style="margin-bottom: 30px; font-size: 10pt;">Pemberi Umpan Balik</div>
+                  <div style="font-weight: bold; font-size: 10pt;">${signatureNameText}</div> 
+                  <div class="signature-line"></div>
+                  <div style="font-size: 10pt; color: white;">.</div>
+              </div>
+          </div>
+        </div>
+      `;
+
+      printContent.innerHTML = printHtml;
+      window.print();
+      
+      analysisModal.style.display = 'none';
+      analysisModal.classList.remove('show');
+      resetApp(); 
+    }
+    
+    function saveData() {
+        if (!inpPenyusun.value.trim() || !inpPemberi.value.trim()) {
+            alert("Mohon lengkapi Nama Penyusun dan Nama Pemberi Umpan Balik sebelum mencetak.");
+            return;
+        }
+
+        const score = avgValue.textContent;
+        const analysis = generateDeepLearningAnalysis(score);
+        
+        modalContent.innerHTML = `
+            <h3>Analisis Perencanaan Pembelajaran Mendalam</h3>
+            <p style="font-size: 1.5rem; font-weight: 700; color: #065f46; margin-bottom: 5px;">${score}</p>
+            <p style="font-size: 1.1rem; font-weight: 700; color: #065f46; margin-bottom: 20px;">Kategori: ${analysis.category}</p>
+            <p>${analysis.analysis}</p>
+            <button id="modalPrintBtn" class="text-base mt-2">
+                CETAK PDF
+            </button>
+        `;
+
+        analysisModal.style.display = 'flex';
+        setTimeout(() => analysisModal.classList.add('show'), 10);
+
+        document.getElementById('modalPrintBtn').onclick = () => {
+            printDocument(analysis.fullText);
+        };
+    }
+    
+    // Save Reflection Data (Simpan)
+    function saveReflectionData() {
+        if (!inpPenyusun.value.trim() || !inpPemberi.value.trim()) {
+            alert("Mohon lengkapi Nama Penyusun dan Nama Pemberi Umpan Balik/Observer sebelum mencetak.");
+            return;
+        }
+
+        // Simpan data refleksi di lokal/sistem (simulasi)
+
+        modalContent.innerHTML = `
+            <h3>Observasi dan Refleksi selesai</h3>
+            <p>Data Anda telah tersimpan. Silakan klik tombol di bawah untuk mencetak data isian Anda.</p>
+            <button id="modalPrintReflBtn" class="text-base mt-2">
+                CETAK PDF
+            </button>
+        `;
+
+        analysisModal.style.display = 'flex';
+        setTimeout(() => analysisModal.classList.add('show'), 10);
+
+        document.getElementById('modalPrintReflBtn').onclick = () => {
+            printReflectionDocument();
+        };
+    }
+
+    btnStart.onclick=()=>{
+      if (!inpPenyusun.value.trim() || !inpPemberi.value.trim()) {
+          alert("Mohon lengkapi Nama Penyusun dan Nama Pemberi Umpan Balik terlebih dahulu.");
+          return;
+      }
+      mode = 'umpanBalik';
+      document.getElementById('intro-container').style.display='none';
+      document.getElementById('main-container').style.display='flex';
+      document.getElementById('reflection-container').style.display='none';
+      document.getElementById('summary-container').style.display = 'none';
+      fadeTo('question');
+      index=0;
+      renderQuestion();
+    };
+
+    // Start Reflection
+    btnStartRefl.onclick=()=>{
+      if (!inpPenyusun.value.trim() || !inpPemberi.value.trim()) {
+          alert("Mohon lengkapi Nama Penyusun dan Nama Pemberi Umpan Balik/Observer terlebih dahulu.");
+          return;
+      }
+      mode = 'observasi';
+      document.getElementById('intro-container').style.display='none';
+      document.getElementById('main-container').style.display='none';
+      document.getElementById('summary-container').style.display='none';
+      document.getElementById('reflection-container').style.display='flex';
+      index=0;
+      renderReflectionQuestion();
+      fadeTo('reflection');
+    };
+
+
+    btnBack.onclick = () => {
+      if (mode === 'umpanBalik') {
+        if (page === 'question' && index > 0) {
+          index--;
+          renderQuestion();
+        } else if (page === 'summary') {
+          document.getElementById('summary-container').style.display = 'none';
+          document.getElementById('main-container').style.display = 'flex';
+          fadeTo('question');
+          index = aspects.length - 1;
+          renderQuestion();
+        } else if (page === 'question' && index === 0) {
+          document.getElementById('main-container').style.display = 'none';
+          document.getElementById('intro-container').style.display = 'flex';
+          fadeTo('intro');
+        }
+      } else if (mode === 'observasi') { // Back logic for Reflection
+        if (page === 'reflection' && index > 0) {
+            index--;
+            renderReflectionQuestion();
+        } else if (page === 'reflection' && index === 0) {
+            document.getElementById('reflection-container').style.display = 'none';
+            document.getElementById('intro-container').style.display = 'flex';
+            fadeTo('intro');
+        }
+      }
+    };
+
+    btnNext.onclick = () => {
+      if (mode === 'umpanBalik') {
+        if (page === 'question' && index < aspects.length - 1) {
+          if (typeof scores[index] === 'undefined' || scores[index] === null || scores[index] === 0) {
+              alert(`Mohon berikan penilaian skala (1-4) untuk Aspek ${index + 1} sebelum melanjutkan.`);
+              return;
+          }
+          index++;
+          renderQuestion();
+        } else if (page === 'question' && index === aspects.length - 1) {
+          if (typeof scores[index] === 'undefined' || scores[index] === null || scores[index] === 0) {
+              alert(`Mohon berikan penilaian skala (1-4) untuk Aspek ${index + 1} sebelum melanjutkan ke Kesimpulan.`);
+              return;
+          }
+          document.getElementById('main-container').style.display = 'none';
+          document.getElementById('summary-container').style.display = 'flex';
+          fadeTo('summary');
+        }
+      } else if (mode === 'observasi') { // Next logic for Reflection
+        if (page === 'reflection' && index < reflectionAspects.length - 1) {
+            index++;
+            renderReflectionQuestion();
+        } else if (page === 'reflection' && index === reflectionAspects.length - 1) {
+            // Sudah di pertanyaan terakhir, simpan dan tampilkan notif/modal
+            saveReflectionData();
+        }
+      }
+    };
+
+    btnSave.onclick = saveData;
+    btnSaveRefl.onclick = saveReflectionData; 
+
+    analysisModal.onclick = (e) => {
+        if (e.target.id === 'analysisModal') {
+            analysisModal.style.display = 'none';
+            analysisModal.classList.remove('show');
+        }
+    };
+
+
+    fadeTo('intro');
+    updateSummaryStats();
+  </script>
+</body>
+</html>

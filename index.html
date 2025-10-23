@@ -415,17 +415,46 @@
       }
       
       /* Optimasi ukuran font dan padding untuk cetak 2 halaman */
+      /* PERMINTAAN 1: Huruf isian kolom aspek diperkecil */
       .main-table th, .main-table td { 
-          font-size: 9pt !important;
+          font-size: 8.5pt !important; /* Diperkecil dari 9pt */
           padding: 3px !important;
       }
       /* FIX 3: TIGHTENING SUMMARY ROWS IN PRINT */
+      /* PERMINTAAN 3: Kurangi kolom isian nomor 16, 17, 18 */
       .main-table tr:nth-last-child(-n+3) td {
           padding: 2px 5px !important; /* Even tighter vertical padding for 16, 17, 18 */
           line-height: 1.2;
       }
       .main-table tr:nth-last-child(-n+3) span {
           display: block; 
+      }
+      
+      /* PERMINTAAN 2: Repeat Header di Setiap Halaman */
+      .main-table thead {
+          display: table-header-group;
+          border-bottom: 2px solid black !important;
+      }
+      .main-table tr {
+          page-break-inside: avoid; /* Membantu mencegah pemotongan baris di tengah */
+      }
+      
+      /* Perbaikan untuk mode refleksi (tabel observasi) */
+      table:not(.main-table) th, table:not(.main-table) td {
+        font-size: 8.5pt !important;
+      }
+      table:not(.main-table) thead {
+        display: table-header-group;
+        border-bottom: 2px solid black !important;
+      }
+      table:not(.main-table) tr { /* PERMINTAAN BARU: Cegah pemotongan baris di tabel Observasi */
+          page-break-inside: avoid; 
+      }
+      
+      /* PERMINTAAN BARU: Cegah pemotongan blok refleksi (No 16, 17, 18) */
+      .reflection-block {
+          page-break-inside: avoid;
+          display: block; /* Penting untuk page-break-inside bekerja */
       }
       
       .meta-info table, .meta-info td {
@@ -573,7 +602,7 @@
       {no:12,kategori:'Langkah Pembelajaran',aspek:'Perencanaan mengakomodir karakteristik murid.'},
       {no:13,kategori:'Asesmen',aspek:'Perencanaan memuat asesmen yang digunakan untuk memberikan umpan balik guna memperbaiki proses pembelajaran.'},
       {no:14,kategori:'Asesmen',aspek:'Perencanaan memuat asesmen yang dapat mengukur ketercapaian tujuan pembelajaran sesuai karakteristik murid.'},
-      {no:15,kategori:'Asesmen',aspek:'Asesmen sudah memiliki kriteria yang jelas dalam mengukur ketercapaian tujuan pembelajaran.'}
+      {no:15,kategori:'Asesmen',aspek:'Perencanaan memuat asesmen yang dapat mengukur ketercapaian tujuan pembelajaran sesuai karakteristik murid.'}
     ];
     
     // Aspek Observasi dan Refleksi
@@ -899,40 +928,80 @@ ${analysis}`;
 async function printReflectionDocument() {
   const penyusun = inpPenyusun.value || '______________________________';
   const pemberi = inpPemberi.value || '______________________________';
+  
+  // Kriteria Sub-Header untuk Observasi
+  const subHeaders = {
+    1: 'KESELARASAN', // REQUEST 3
+    3: 'IMPLEMENTASI KERANGKA PEMBELAJARAN', // REQUEST 4
+    7: 'LANGKAH PEMBELAJARAN', // REQUEST 5
+    13: 'ASESMEN' // REQUEST 6
+  };
 
   // Tabel aspek 1–15
   let tableRows = '';
   reflectionAspects.slice(0, 15).forEach((a, i) => {
+    
+    // Sisipkan Sub-Header (REQUEST 3, 4, 5, 6)
+    if (subHeaders[a.no]) {
+      tableRows += `
+        <tr>
+          <td colspan="4" style="background:#f3f3f3; font-weight:bold; text-align:left; padding: 6px;">${subHeaders[a.no]}</td>
+        </tr>
+      `;
+    }
+      
     const data = reflectionData[i] || { bukti: '', catatan: '' };
     tableRows += `
       <tr>
         <td style="text-align:center;">${a.no}</td>
-        <td style="text-align:justify;">${a.aspek}</td>
-        <td>${data.bukti || ''}</td>
+        <td style="text-align:left;">${a.aspek}</td> <td>${data.bukti || ''}</td>
         <td>${data.catatan || ''}</td>
       </tr>
     `;
   });
 
-  // Refleksi 16–18
+  // Refleksi 16–18: Dibungkus dalam div.reflection-block untuk page-break-inside: avoid;
   let refleksiBlocks = '';
-  reflectionAspects.slice(15).forEach((a) => {
-    refleksiBlocks += `
-      <div style="margin-bottom:22px;">
-        <div style="font-weight:bold; margin-bottom:6px;">${a.no}. ${a.aspek}</div>
-        <div style="border:1px solid #000; min-height:230px; padding:10px; text-align:justify;"></div>
-      </div>
-    `;
-  });
+  // Mengambil data dari reflectionData index 15, 16, 17
+  const r16data = reflectionData[15] || { catatan: '' };
+  const r17data = reflectionData[16] || { catatan: '' };
+  const r18data = reflectionData[17] || { catatan: '' };
+  
+  // Menggunakan aspek no 16, 17, 18
+  const r16aspect = reflectionAspects[15];
+  const r17aspect = reflectionAspects[16];
+  const r18aspect = reflectionAspects[17];
+
+  refleksiBlocks += `
+    <div class="reflection-block" style="margin-bottom:22px;">
+      <div style="font-weight:bold; margin-bottom:6px;">${r16aspect.no}. ${r16aspect.aspek}</div>
+      <div style="border:1px solid #000; min-height:100px; padding:10px; text-align:justify; white-space: pre-wrap;">${r16data.catatan || ''}</div>
+    </div>
+    <div class="reflection-block" style="margin-bottom:22px;">
+      <div style="font-weight:bold; margin-bottom:6px;">${r17aspect.no}. ${r17aspect.aspek}</div>
+      <div style="border:1px solid #000; min-height:100px; padding:10px; text-align:justify; white-space: pre-wrap;">${r17data.catatan || ''}</div>
+    </div>
+    <div class="reflection-block" style="margin-bottom:22px;">
+      <div style="font-weight:bold; margin-bottom:6px;">${r18aspect.no}. ${r18aspect.aspek.replace('Selanjutnya:','')}</div>
+      <div style="border:1px solid #000; min-height:100px; padding:10px; text-align:justify; white-space: pre-wrap;">${r18data.catatan || ''}</div>
+    </div>
+  `;
+
 
   const html = `
   <style>
-    @page { size: A4; margin: 2cm 2.5cm; }
-    body { font-family:'Times New Roman',serif; font-size:12pt; color:#000; }
-    table { width:100%; border-collapse:collapse; margin-bottom:10px; }
-    th,td { border:1px solid #000; padding:6px; vertical-align:top; }
+    @page { size: A4; margin: 1cm 1.2cm; }
+    body { font-family:'Times New Roman',serif; font-size:11pt; color:#000; }
+    table { width:100%; border-collapse:collapse; margin-bottom:10px; table-layout: fixed; }
+    th,td { border:1px solid #000; padding:6px; vertical-align:top; font-size: 8.5pt;} /* FONT SIZE DITERAPKAN */
     th { background:#f3f3f3; text-align:center; }
     .page-break { page-break-before: always; }
+    
+    /* REQUEST 1: Header berulang & Cegah pemotongan baris */
+    table thead { display: table-header-group; border-bottom: 2px solid black !important; } 
+    table tr { page-break-inside: avoid; }
+    .reflection-block { page-break-inside: avoid; display: block; } 
+
   </style>
 
   <div style="text-align:center; font-weight:bold; margin-bottom:10px;">
@@ -948,23 +1017,28 @@ async function printReflectionDocument() {
   <p style="margin-bottom:6px;">Berikan umpan balik terhadap praktik yang telah dilakukan dengan menggunakan instrumen berikut!</p>
 
   <table>
+    <colgroup>
+      <col style="width:6%;">
+      <col style="width:35%;">
+      <col style="width:30%;">
+      <col style="width:29%;">
+    </colgroup>
     <thead>
       <tr>
-        <th style="width:6%;">No.</th>
-        <th style="width:44%;">Aspek yang diamati</th>
-        <th style="width:25%;">Bukti Pembelajaran</th>
-        <th style="width:25%;">Catatan</th>
+        <th>No.</th>
+        <th>Aspek yang diamati</th>
+        <th>Bukti Pembelajaran</th>
+        <th>Catatan</th>
       </tr>
     </thead>
     <tbody>${tableRows}</tbody>
   </table>
 
-  <div class="page-break"></div>
-  <div style="text-align:center; font-weight:bold; margin:10px 0;">REFLEKSI</div>
+  <div style="text-align:center; font-weight:bold; margin:20px 0 10px 0; page-break-before: auto;">REFLEKSI</div>
 
   ${refleksiBlocks}
 
-  <div style="margin-top:40px; text-align:right;">
+  <div style="margin-top:40px; text-align:right; page-break-before: auto;">
     <div style="display:inline-block; width:250px; text-align:center;">
       <div style="margin-bottom:40px;">Pemberi Umpan Balik</div>
       <div style="font-weight:bold;">${pemberi}</div>
@@ -1014,39 +1088,25 @@ async function printReflectionDocument() {
         `;
       });
       // 16–18: refleksi panjang (bukan tabel)
-  let refleksiBlocks = '';
-  reflectionAspects.slice(15).forEach((a, i) => {
-    const idx = i + 15;
-    const data = reflectionData[idx] || { catatan: '' };
-    refleksiBlocks += `
-      <div style="margin-bottom: 20px;">
-        <div style="font-weight: bold; margin-bottom: 6px;">${a.no}. ${a.aspek}</div>
-        <div style="border: 1px solid #000; min-height: 180px; padding: 10px; white-space: pre-wrap; text-align: justify;">
-          ${data.catatan || ''}
-        </div>
-      </div>
-    `;
-  });
-
-
-  
+      // Perubahan: Menempelkan 16, 17, 18 sebagai baris dengan 5 kolom (No, Aspek, Umpan Balik, 4 Skala jadi 1 colspan)
+      
       tableRows += `
         <tr>
             <td>16</td>
-            <td style="text-align: justify;">Pelajaran apa yang telah diperoleh dari Implementasi Perencanaan Pembelajaran yang telah dilakukan beserta faktor-faktor pendukungnya?</td>
-            <td style="text-align: left;">${fb16.value}</td>
+            <td style="text-align: justify;">Kelebihan Perencanaan</td>
+            <td style="text-align: left;"><span>${fb16.value}</span></td>
             <td style="text-align: left;" colspan="4"></td>
         </tr>
         <tr>
             <td>17</td>
-            <td style="text-align: justify;">Hal-hal apa saja yang pencapaiannya belum memuaskan dari Implementasi Perencanaan Pembelajaran yang telah dilakukan beserta faktor-faktor penghambatnya?</td>
-            <td style="text-align: left;">${fb17.value}</td>
+            <td style="text-align: justify;">Hal yang perlu ditingkatkan</td>
+            <td style="text-align: left;"><span>${fb17.value}</span></td>
             <td style="text-align: left;" colspan="4"></td>
         </tr>
         <tr>
             <td>18</td>
-            <td style="text-align: justify;">Rencana tindak lanjut apa yang akan dibuat untuk perbaikan ke depan?</td>
-            <td style="text-align: left;">${fb18.value}</td>
+            <td style="text-align: justify;">Rekomendasi Perbaikan</td>
+            <td style="text-align: left;"><span>${fb18.value}</span></td>
             <td style="text-align: left;" colspan="4"></td>
         </tr>
     `;
@@ -1077,6 +1137,10 @@ async function printReflectionDocument() {
               border-collapse: collapse; 
               table-layout: fixed; 
           }
+          .main-table thead {
+              display: table-header-group; /* PERMINTAAN 2: Repeat Header */
+              border-bottom: 2px solid black !important;
+          }
           .main-table th { 
             background-color: #f0f0f0; 
             text-align: center;      
@@ -1086,18 +1150,22 @@ async function printReflectionDocument() {
             border: 1px solid black; 
             padding: 3px; 
             vertical-align: top;
-            font-size: 9pt; 
+            font-size: 8.5pt !important; /* PERMINTAAN 1: Huruf Aspek Diperkecil (diambil dari media print) */
             word-wrap: break-word;
           }
           .main-table tr > td:nth-child(1) {
               text-align: center;
           }
+          /* PERMINTAAN 3: Kerapatan baris 16, 17, 18 */
           .main-table tr:nth-last-child(-n+3) td {
               padding: 2px 5px !important; 
               line-height: 1.2;
           }
           .main-table tr:nth-last-child(-n+3) span {
               display: block; 
+          }
+          .main-table tr {
+              page-break-inside: avoid; /* Membantu mencegah pemotongan baris di tengah */
           }
           
           .signature-box { 

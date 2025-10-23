@@ -1069,16 +1069,35 @@ async function printReflectionDocument() {
       const penyusun = inpPenyusun.value || '______________________________';
       const pemberi = inpPemberi.value || '______________________________';
       
+      // Definisikan Sub-Header berdasarkan nomor aspek (no) (PERMINTAAN 3, 4, 5, 6)
+      const subHeaders = {
+          1: 'KESELARASAN', 
+          3: 'IMPLEMENTASI KERANGKA PEMBELAJARAN', 
+          7: 'LANGKAH PEMBELAJARAN', 
+          13: 'ASESMEN'
+      };
+
       let tableRows = '';
       aspects.forEach((a, i) => {
         const score = scores[i] || 0;
-        const note = notes[i] ? notes[i].substring(0, 150) + (notes[i].length > 150 ? '...' : '') : ''; 
+        
+        // Pengecekan Sub-Header sebelum baris aspek
+        if (subHeaders[a.no]) {
+           // colspan="7" karena total kolom adalah 7
+           tableRows += `
+              <tr>
+                 <td colspan="7" style="background:#f3f3f3; font-weight:bold; text-align:left; padding: 6px;">${subHeaders[a.no]}</td>
+              </tr>
+            `;
+        }
+
+        const note = notes[i] ? notes[i] : ''; 
         const check = (s) => (score == s ? '✔' : '');
         
         tableRows += `
           <tr>
-            <td>${a.no}</td>
-            <td style="text-align: justify;">${a.aspek}</td>
+            <td style="text-align:center;">${a.no}</td>
+            <td style="text-align: left;">${a.aspek}</td>
             <td style="text-align: left;">${note}</td>
             <td style="text-align:center;">${check(1)}</td>
             <td style="text-align:center;">${check(2)}</td>
@@ -1087,27 +1106,25 @@ async function printReflectionDocument() {
           </tr>
         `;
       });
-      // 16–18: refleksi panjang (bukan tabel)
-      // Perubahan: Menempelkan 16, 17, 18 sebagai baris dengan 5 kolom (No, Aspek, Umpan Balik, 4 Skala jadi 1 colspan)
+      
+      // 16–18: refleksi panjang (Gabungkan kolom umpan balik dan skala) (PERMINTAAN 7)
+      // Gunakan colspan="5" untuk kolom Umpan Balik
       
       tableRows += `
         <tr>
-            <td>16</td>
-            <td style="text-align: justify;">Kelebihan Perencanaan</td>
-            <td style="text-align: left;"><span>${fb16.value}</span></td>
-            <td style="text-align: left;" colspan="4"></td>
+            <td style="text-align:center;">16</td>
+            <td style="text-align: left;">Kelebihan Perencanaan</td>
+            <td colspan="5" style="text-align: left;"><span>${fb16.value}</span></td>
         </tr>
         <tr>
-            <td>17</td>
-            <td style="text-align: justify;">Hal yang perlu ditingkatkan</td>
-            <td style="text-align: left;"><span>${fb17.value}</span></td>
-            <td style="text-align: left;" colspan="4"></td>
+            <td style="text-align:center;">17</td>
+            <td style="text-align: left;">Hal yang perlu ditingkatkan</td>
+            <td colspan="5" style="text-align: left;"><span>${fb17.value}</span></td>
         </tr>
         <tr>
-            <td>18</td>
-            <td style="text-align: justify;">Rekomendasi Perbaikan</td>
-            <td style="text-align: left;"><span>${fb18.value}</span></td>
-            <td style="text-align: left;" colspan="4"></td>
+            <td style="text-align:center;">18</td>
+            <td style="text-align: left;">Rekomendasi Perbaikan</td>
+            <td colspan="5" style="text-align: left;"><span>${fb18.value}</span></td>
         </tr>
     `;
       
@@ -1125,7 +1142,15 @@ async function printReflectionDocument() {
         <style>
           @page { size: A4; margin: 1cm 1.2cm; } 
           body { font-family: 'Times New Roman', serif; font-size: 11pt; padding: 0; margin: 0; }
-          .print-header { text-align: center; margin-bottom: 5pt; } 
+          .print-header { 
+              text-align: center; 
+              margin-bottom: 5pt;
+              /* PERMINTAAN 1: Rata tengah vertikal */
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              min-height: 40px; 
+          } 
           .print-header div { font-weight: bold; font-size: 10pt; }
           .meta-info { margin-bottom: 8pt; }
           .meta-info table { width: 100%; border-collapse: collapse; }
@@ -1138,7 +1163,7 @@ async function printReflectionDocument() {
               table-layout: fixed; 
           }
           .main-table thead {
-              display: table-header-group; /* PERMINTAAN 2: Repeat Header */
+              display: table-header-group; /* PERMINTAAN 1: Repeat Header */
               border-bottom: 2px solid black !important;
           }
           .main-table th { 
@@ -1150,22 +1175,26 @@ async function printReflectionDocument() {
             border: 1px solid black; 
             padding: 3px; 
             vertical-align: top;
-            font-size: 8.5pt !important; /* PERMINTAAN 1: Huruf Aspek Diperkecil (diambil dari media print) */
+            font-size: 8.5pt !important;
             word-wrap: break-word;
+          }
+          /* PERMINTAAN 2: Isi Kolom Aspek Rata Kiri */
+          .main-table tr > td:nth-child(2) { 
+              text-align: left !important; 
           }
           .main-table tr > td:nth-child(1) {
               text-align: center;
           }
-          /* PERMINTAAN 3: Kerapatan baris 16, 17, 18 */
+          /* Kerapatan baris 16, 17, 18 */
           .main-table tr:nth-last-child(-n+3) td {
-              padding: 2px 5px !important; 
+              padding: 5px !important; 
               line-height: 1.2;
           }
           .main-table tr:nth-last-child(-n+3) span {
               display: block; 
           }
           .main-table tr {
-              page-break-inside: avoid; /* Membantu mencegah pemotongan baris di tengah */
+              page-break-inside: avoid;
           }
           
           .signature-box { 
@@ -1204,18 +1233,18 @@ async function printReflectionDocument() {
 
           <table class="main-table">
             <colgroup>
-              <col style="width: 7%;">
-              <col style="width: 45%;">
-              <col style="width: 25%;">
+              <col style="width: 7%;"> 
+              <col style="width: 35%;"> 
+              <col style="width: 35%;"> 
               <col style="width: 5.75%;">
-              <col style="width: 5.75%;">
-              <col style="width: 5.75%;">
-              <col style="width: 5.75%;">
+              <col style="width: 5.75%;"> 
+              <col style="width: 5.75%;"> 
+              <col style="width: 5.75%;"> 
             </colgroup>
             <thead>
               <tr>
                 <th rowspan="2">No.</th>
-                <th rowspan="2" style="text-align: justify;">Aspek yang diamati</th>
+                <th rowspan="2" style="text-align: center;">Aspek yang diamati</th>
                 <th rowspan="2">Umpan balik</th>
                 <th colspan="4">Skala</th>
               </tr>

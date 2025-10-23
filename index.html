@@ -463,6 +463,7 @@
       }
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 </head>
 <body>
   <div class="app">
@@ -577,7 +578,7 @@
     
     // Aspek Observasi dan Refleksi
     const reflectionAspects = [
-      { no: 1, kategori: 'Keselarasan', aspek: 'Tindakan implementasi perencanaan selaras dengan perencanaan pembelajaran pada:', subAspek: ['awal pembelajaran', 'inti pembelajaran dalam proses memahami, mengaplikasi, dan merefleksi', 'penutupan pembelajaran'] },
+      { no: 1, kategori: 'Keselarasan', aspek: 'Tindakan implementasi perencanaan selaras dengan perencanaan pembelajaran pada: awal pembelajaran, inti pembelajaran dalam proses memahami, mengaplikasi, dan merefleksi, penutupan pembelajaran' },
       { no: 2, kategori: 'Keselarasan', aspek: 'Upaya mencapai tujuan pembelajaran menuju pencapaian dimensi profil lulusan selaras dengan perencanaan pembelajaran' },
       { no: 3, kategori: 'Implementasi Kerangka Pembelajaran', aspek: 'Praktik pedagogis yang diimplementasikan sudah tergambar pada langkah pembelajaran dan/atau asesmen pembelajaran' },
       { no: 4, kategori: 'Implementasi Kerangka Pembelajaran', aspek: 'Lingkungan belajar yang diimplementasikan sudah tergambar pada langkah pembelajaran dan/atau asesmen pembelajaran' },
@@ -894,144 +895,109 @@ ${analysis}`;
         updateSummaryStats();
     }
 
-    // Print Reflection Document
-    function printReflectionDocument() {
-        const penyusun = inpPenyusun.value || '______________________________';
-        const pemberi = inpPemberi.value || '______________________________';
+  
+async function printReflectionDocument() {
+  const penyusun = inpPenyusun.value || '______________________________';
+  const pemberi = inpPemberi.value || '______________________________';
 
-        let tableRows = '';
-        reflectionAspects.forEach((a, i) => {
-            const data = reflectionData[i] || { bukti: '', catatan: '' };
-            const bukti = data.bukti || '';
-            const catatan = data.catatan || '';
-            const isRefleksiSection = i >= 15; // Aspek 16 ke atas adalah Refleksi
+  // Tabel aspek 1–15
+  let tableRows = '';
+  reflectionAspects.slice(0, 15).forEach((a, i) => {
+    const data = reflectionData[i] || { bukti: '', catatan: '' };
+    tableRows += `
+      <tr>
+        <td style="text-align:center;">${a.no}</td>
+        <td style="text-align:justify;">${a.aspek}</td>
+        <td>${data.bukti || ''}</td>
+        <td>${data.catatan || ''}</td>
+      </tr>
+    `;
+  });
 
-            tableRows += `
-                <tr>
-                    <td>${a.no}</td>
-                    <td style="text-align: justify;">${a.aspek}</td>
-                    <td style="text-align: left;">${isRefleksiSection ? 'Reflesi' : bukti}</td> 
-                    <td style="text-align: left;">${catatan}</td>
-                </tr>
-            `;
-        });
+  // Refleksi 16–18
+  let refleksiBlocks = '';
+  reflectionAspects.slice(15).forEach((a) => {
+    refleksiBlocks += `
+      <div style="margin-bottom:22px;">
+        <div style="font-weight:bold; margin-bottom:6px;">${a.no}. ${a.aspek}</div>
+        <div style="border:1px solid #000; min-height:230px; padding:10px; text-align:justify;"></div>
+      </div>
+    `;
+  });
 
-        const signatureNameText = inpPemberi.value ? `${inpPemberi.value}` : '______________________________';
+  const html = `
+  <style>
+    @page { size: A4; margin: 2cm 2.5cm; }
+    body { font-family:'Times New Roman',serif; font-size:12pt; color:#000; }
+    table { width:100%; border-collapse:collapse; margin-bottom:10px; }
+    th,td { border:1px solid #000; padding:6px; vertical-align:top; }
+    th { background:#f3f3f3; text-align:center; }
+    .page-break { page-break-before: always; }
+  </style>
 
-        const printHtml = `
-            <style>
-                /* FIX 2: Print Margin diperlebar (dari 2cm menjadi 1.2cm) */
-                @page { size: A4; margin: 1cm 1.2cm; } 
-                body { font-family: 'Times New Roman', serif; font-size: 11pt; padding: 0; margin: 0; }
-                .print-header { text-align: center; margin-bottom: 5pt; } 
-                .print-header div { font-weight: bold; }
-                .meta-info { margin-bottom: 12pt; }
-                .meta-info table { width: 100%; border-collapse: collapse; }
-                .meta-info td:first-child { width: 35%; }
-                
-                .main-table { 
-                    width: 100%; 
-                    border-collapse: collapse; 
-                    table-layout: fixed; 
-                }
-                .main-table th { 
-                    background-color: #f0f0f0; 
-                    text-align: center;      
-                    vertical-align: middle;  
-                }
-                .main-table th, .main-table td { 
-                    border: 1px solid black; 
-                    padding: 3px; 
-                    vertical-align: top;
-                    font-size: 9pt; 
-                    word-wrap: break-word;
-                    height: auto !important; 
-                }
-                .main-table tr > td:nth-child(1) {
-                    text-align: center;
-                }
-                
-                .signature-box { 
-                    margin-top: 30px; 
-                    display: flex; 
-                    justify-content: flex-end; 
-                }
-                .signature-box div { 
-                    width: 250px; 
-                    text-align: center; 
-                    display: flex; 
-                    flex-direction: column; 
-                    align-items: center; 
-                }
-                .signature-line {
-                    border-bottom: 1px solid black; 
-                    width: 100%;
-                }
-            </style>
-            
-            <div style="padding: 0.5cm 1cm;"> 
-                <div class="print-header">
-                    <div>PELATIHAN KERJA ( ON-the JOB TRAINING /OJT) GURU</div>
-                    <div>INSTRUMEN OBSERVASI IMPLEMENTASI DAN REFLEKSI PERENCANAAN PEMBELAJARAN</div>
-                </div>
-                
-                <div class="meta-info">
-                    <table>
-                        <tr><td>Penyusun Perencanaan</td><td>: ${penyusun}</td></tr>
-                        <tr><td>Pemberi Umpan Balik</td><td>: ${pemberi}</td></tr>
-                    </table>
-                </div>
+  <div style="text-align:center; font-weight:bold; margin-bottom:10px;">
+    PELATIHAN KERJA (ON-the JOB TRAINING / OJT) GURU<br>
+    INSTRUMEN OBSERVASI IMPLEMENTASI DAN REFLEKSI PERENCANAAN PEMBELAJARAN
+  </div>
 
-                <p>Berikan umpan balik terhadap praktik yang telah dilakukan dengan menggunakan instrumen berikut!</p>
+  <table style="margin-bottom:12px;">
+    <tr><td style="width:35%;">Penyusun Perencanaan</td><td>: ${penyusun}</td></tr>
+    <tr><td>Pemberi Umpan Balik</td><td>: ${pemberi}</td></tr>
+  </table>
 
-                <table class="main-table">
-                    <colgroup>
-                        <col style="width: 7%;">
-                        <col style="width: 45%;">
-                        <col style="width: 28%;">
-                        <col style="width: 20%;">
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            <th>No.</th>
-                            <th style="text-align: justify;">Aspek yang diamati</th>
-                            <th>Bukti Pembelajaran</th>
-                            <th>Catatan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${tableRows}
-                    </tbody>
-                </table>
+  <p style="margin-bottom:6px;">Berikan umpan balik terhadap praktik yang telah dilakukan dengan menggunakan instrumen berikut!</p>
 
-                <div class="signature-box">
-                    <div style="width: 250px; text-align: center;">
-                        <div style="margin-bottom: 30px;">Pemberi Umpan Balik</div>
-                        <div style="font-weight: bold; font-size: 10pt;">${signatureNameText}</div> 
-                        <div class="signature-line"></div>
-                        <div style="font-size: 10pt; color: white;">.</div>
-                    </div>
-                </div>
-            </div>
-        `;
+  <table>
+    <thead>
+      <tr>
+        <th style="width:6%;">No.</th>
+        <th style="width:44%;">Aspek yang diamati</th>
+        <th style="width:25%;">Bukti Pembelajaran</th>
+        <th style="width:25%;">Catatan</th>
+      </tr>
+    </thead>
+    <tbody>${tableRows}</tbody>
+  </table>
 
-        printContent.innerHTML = printHtml;
-        window.print();
-        
-        analysisModal.style.display = 'none';
-        analysisModal.classList.remove('show');
-        resetApp(); 
-    }
+  <div class="page-break"></div>
+  <div style="text-align:center; font-weight:bold; margin:10px 0;">REFLEKSI</div>
+
+  ${refleksiBlocks}
+
+  <div style="margin-top:40px; text-align:right;">
+    <div style="display:inline-block; width:250px; text-align:center;">
+      <div style="margin-bottom:40px;">Pemberi Umpan Balik</div>
+      <div style="font-weight:bold;">${pemberi}</div>
+      <div style="border-top:1px solid #000; margin-top:5px;"></div>
+    </div>
+  </div>`;
+
+  printContent.innerHTML = html;
+  printContent.style.display = 'block';
+  await new Promise(r => setTimeout(r, 300));
+
+  const opt = {
+    margin: [10,12],
+    filename: `Instrumen_Refleksi_${new Date().toISOString().slice(0,10)}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  await html2pdf().from(printContent).set(opt).save();
+
+  printContent.style.display = 'none';
+  resetApp();
+}
 
 
-    function printDocument(analysisText) {
+
+    async function printDocument(analysisText) {
       const penyusun = inpPenyusun.value || '______________________________';
       const pemberi = inpPemberi.value || '______________________________';
       
       let tableRows = '';
       aspects.forEach((a, i) => {
         const score = scores[i] || 0;
-        // Catatan dibuat lebih ringkas saat dicetak
         const note = notes[i] ? notes[i].substring(0, 150) + (notes[i].length > 150 ? '...' : '') : ''; 
         const check = (s) => (score == s ? '✔' : '');
         
@@ -1047,20 +1013,43 @@ ${analysis}`;
           </tr>
         `;
       });
-      
-      // Gunakan colspan 7 untuk meratakan 3 kolom isian terakhir
-      // FIX 3: Baris ini akan lebih padat karena CSS baru
+      // 16–18: refleksi panjang (bukan tabel)
+  let refleksiBlocks = '';
+  reflectionAspects.slice(15).forEach((a, i) => {
+    const idx = i + 15;
+    const data = reflectionData[idx] || { catatan: '' };
+    refleksiBlocks += `
+      <div style="margin-bottom: 20px;">
+        <div style="font-weight: bold; margin-bottom: 6px;">${a.no}. ${a.aspek}</div>
+        <div style="border: 1px solid #000; min-height: 180px; padding: 10px; white-space: pre-wrap; text-align: justify;">
+          ${data.catatan || ''}
+        </div>
+      </div>
+    `;
+  });
+
+
+  
       tableRows += `
-          <tr>
-              <td colspan="7" style="font-weight: bold; padding-left: 10px; text-align: left;">16. Kelebihan Perencanaan Pembelajaran: <span style="font-weight: normal;">${fb16.value}</span></td>
-          </tr>
-          <tr>
-              <td colspan="7" style="font-weight: bold; padding-left: 10px; text-align: left;">17. Hal yang perlu ditingkatkan dari Perencanaan Pembelajaran: <span style="font-weight: normal;">${fb17.value}</span></td>
-          </tr>
-          <tr>
-              <td colspan="7" style="font-weight: bold; padding-left: 10px; text-align: left;">18. Rekomendasi perbaikan Perencanaan Pembelajaran sesuai prinsip PM: <span style="font-weight: normal;">${fb18.value}</span></td>
-          </tr>
-      `;
+        <tr>
+            <td>16</td>
+            <td style="text-align: justify;">Pelajaran apa yang telah diperoleh dari Implementasi Perencanaan Pembelajaran yang telah dilakukan beserta faktor-faktor pendukungnya?</td>
+            <td style="text-align: left;">${fb16.value}</td>
+            <td style="text-align: left;" colspan="4"></td>
+        </tr>
+        <tr>
+            <td>17</td>
+            <td style="text-align: justify;">Hal-hal apa saja yang pencapaiannya belum memuaskan dari Implementasi Perencanaan Pembelajaran yang telah dilakukan beserta faktor-faktor penghambatnya?</td>
+            <td style="text-align: left;">${fb17.value}</td>
+            <td style="text-align: left;" colspan="4"></td>
+        </tr>
+        <tr>
+            <td>18</td>
+            <td style="text-align: justify;">Rencana tindak lanjut apa yang akan dibuat untuk perbaikan ke depan?</td>
+            <td style="text-align: left;">${fb18.value}</td>
+            <td style="text-align: left;" colspan="4"></td>
+        </tr>
+    `;
       
       const analysisHtml = `
           <div style="margin-top: 15px; border: 1px solid #ccc; padding: 8px; border-radius: 5px; page-break-before: auto;">
@@ -1074,7 +1063,6 @@ ${analysis}`;
 
       const printHtml = `
         <style>
-          /* FIX 2: Print Margin diperlebar (dari 2cm menjadi 1.2cm) */
           @page { size: A4; margin: 1cm 1.2cm; } 
           body { font-family: 'Times New Roman', serif; font-size: 11pt; padding: 0; margin: 0; }
           .print-header { text-align: center; margin-bottom: 5pt; } 
@@ -1104,7 +1092,6 @@ ${analysis}`;
           .main-table tr > td:nth-child(1) {
               text-align: center;
           }
-          /* FIX 3: TIGHTENING SUMMARY ROWS IN PRINT */
           .main-table tr:nth-last-child(-n+3) td {
               padding: 2px 5px !important; 
               line-height: 1.2;
@@ -1190,8 +1177,24 @@ ${analysis}`;
       `;
 
       printContent.innerHTML = printHtml;
-      window.print();
+      // use html2pdf to save as A4 portrait without print dialog
+      printContent.style.display = 'block';
+      await new Promise(r=>setTimeout(r, 400));
+      const filename = `umpanbalik_${(inpPemberi.value||'pemberi').trim().replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.pdf`;
+      const opt = {
+        margin: [10,12],
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      try {
+        await html2pdf().from(printContent).set(opt).save();
+      } catch(e) {
+        alert('Gagal membuat PDF: '+e);
+      }
       
+      printContent.style.display = 'none';
       analysisModal.style.display = 'none';
       analysisModal.classList.remove('show');
       resetApp(); 
@@ -1236,7 +1239,7 @@ ${analysis}`;
         modalContent.innerHTML = `
             <h3>Observasi dan Refleksi selesai</h3>
             <p>Data Anda telah tersimpan. Silakan klik tombol di bawah untuk mencetak data isian Anda.</p>
-            <button id="modalPrintReflBtn" class="text-base mt-2">
+            <button id="modalPrintBtn" class="text-base mt-2">
                 CETAK PDF
             </button>
         `;
@@ -1244,7 +1247,7 @@ ${analysis}`;
         analysisModal.style.display = 'flex';
         setTimeout(() => analysisModal.classList.add('show'), 10);
 
-        document.getElementById('modalPrintReflBtn').onclick = () => {
+        document.getElementById('modalPrintBtn').onclick = () => {
             printReflectionDocument();
         };
     }

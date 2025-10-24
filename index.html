@@ -51,13 +51,34 @@
     }
 
     /* ... (CSS untuk .title, .scale-info, .header-stats, .stat-box, dll. tetap sama) ... */
-    .title {
-      font-weight: 900;
-      color: #065f46;
-      font-size: 20px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+    .header-left {
+  display: flex;
+  align-items: center;
+  justify-content: center;  /* 🔹 Pusatkan isi header */
+  position: relative;
+  width: 100%;
+}
+
+.header-left svg {
+  flex-shrink: 0;
+}
+
+/* 🔹 Judul Tengah */
+.title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  font-size: 25px;          /* ukuran besar */
+  font-weight: 950;         /* tebal */
+  color: #065f46;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  white-space: nowrap;      /* 🔹 cegah teks turun ke baris kedua */
+  max-width: 98%;           /* 🔹 beri ruang agar tidak kepotong di layar kecil */
+  overflow: hidden;         /* 🔹 sembunyikan kalau terlalu panjang */
+  text-overflow: ellipsis;  /* 🔹 beri tanda ... jika terlalu panjang */
+}
 
     .scale-info {
       font-size: 10px;
@@ -250,8 +271,8 @@
     }
     
     #page-intro input {
-        height: 50px;
-        margin-bottom: 12px;
+        height: 35px;
+        margin-bottom: 10px;
     }
 
     /* ---------------------------------------------------- */
@@ -489,7 +510,7 @@
     }
 
     @media(max-width:640px){
-      .title{font-size:16px}
+      .title{font-size:18px}
       .avg-value{font-size:22px}
       .scale-btn{font-size:14px;padding:8px 0}
       .stat-box { height: 80px; padding: 10px; }
@@ -528,6 +549,21 @@
 .btn-small-footer:hover {
   background-color: #059669; /* bg-emerald-600 */
 }
+.menu-item {
+  padding: 10px 16px;
+  font-weight: 600;
+  color: #065f46;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.menu-item:hover {
+  background: #d1fae5;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 </head>
@@ -535,19 +571,64 @@
   <div class="app">
     <div class="card">
       <div class="topbar">
-        <div class="title">INSTRUMEN UMPAN BALIK & OBSERVASI REFLEKSI</div>
-        <div id="scale-info-ub" class="scale-info">1 = Hampir tidak ada • 2 = Sedikit • 3 = Cukup • 4 = Memadai</div>
-        <div id="header-stats-ub" class="header-stats">
-          <div class="stat-box avg-box">
-            <div class="avg-label">Skor</div>
-            <div id="avgValue" class="avg-value">0.00</div>
-          </div>
-          <div class="stat-box analysis-box">
-            <div class="analysis-title">Rekap Kategori</div>
-            <div id="analysisText" class="analysis-text"></div>
-          </div>
-        </div>
-      </div>
+  <div class="header-left" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+    
+    <!-- 🔹 Ikon Home di kiri -->
+    <div id="btnHome" 
+         style="cursor:pointer; display:flex; align-items:center; gap:6px;" 
+         onclick="window.location.href='https://andessta.github.io/akademik/'">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="#047857" width="28" height="28">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V9.5z" />
+</svg>
+      <span class="title">INSTRUMEN UMPAN BALIK & OBSERVASI REFLEKSI</span>
+    </div>
+
+    <!-- 🔹 Ikon 3 Garis di kanan -->
+    <div id="menuButton" style="cursor:pointer; display:flex; align-items:center;">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#065f46" width="26" height="26">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </div>
+  </div>
+
+<!-- 🔹 Floating Dropdown Menu -->
+<div id="floatingMenu" 
+     style="
+       display: none;
+       position: absolute;
+       top: 60px;
+       right: 20px;
+       background: white;
+       box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+       border-radius: 10px;
+       z-index: 2000;
+       min-width: 220px;
+       overflow: hidden;
+       animation: fadeIn 0.2s ease-out;
+     ">
+  <div style="padding: 10px 0;">
+    <div class="menu-item" onclick="window.location.href='https://andesofiani.github.io/pemetaan-profil-pola-pikir/'">
+      🧠 Pemetaan Mindset
+    </div>
+    <div class="menu-item" onclick="window.location.href='https://andes-web.github.io/mpsmobile/'">
+      🎓 Ekstrakurikuler
+    </div>
+  </div>
+</div>
+
+  <div id="scale-info-ub" class="scale-info">1 = Hampir tidak ada • 2 = Sedikit • 3 = Cukup • 4 = Memadai</div>
+  <div id="header-stats-ub" class="header-stats">
+    <div class="stat-box avg-box">
+      <div class="avg-label">Skor</div>
+      <div id="avgValue" class="avg-value">0.00</div>
+    </div>
+    <div class="stat-box analysis-box">
+      <div class="analysis-title">Rekap Kategori</div>
+      <div id="analysisText" class="analysis-text"></div>
+    </div>
+  </div>
+</div>
+
 
       <div class="content">
         <div id="intro-container" class="container-soft" style="display:flex;">
@@ -704,6 +785,22 @@
     const analysisModal = document.getElementById('analysisModal');
     const modalContent = document.getElementById('modalContent');
 
+    // 🔹 Tampilkan/Sembunyikan menu saat 3 garis diklik
+const menuButton = document.getElementById('menuButton');
+const floatingMenu = document.getElementById('floatingMenu');
+
+menuButton.addEventListener('click', (e) => {
+  e.stopPropagation();
+  floatingMenu.style.display = (floatingMenu.style.display === 'block') ? 'none' : 'block';
+});
+
+// 🔹 Klik di luar menu untuk menutup
+document.addEventListener('click', (e) => {
+  if (floatingMenu.style.display === 'block' && !floatingMenu.contains(e.target) && !menuButton.contains(e.target)) {
+    floatingMenu.style.display = 'none';
+  }
+});
+
 
     function fadeTo(targetPage){
       pages.forEach(p=>p.classList.remove('active'));
@@ -743,7 +840,7 @@
         if (currentMode === 'umpanBalik') {
             headerStatsUB.style.display = 'flex';
             scaleInfoUB.style.display = 'block';
-            document.querySelector('.title').textContent = 'INSTRUMEN UMPAN BALIK PERENCANAAN PEMBELAJARAN';
+            document.querySelector('.title').textContent = 'INSTRUMEN SUPERVISI';
         } else {
             headerStatsUB.style.display = 'none';
             scaleInfoUB.style.display = 'none';

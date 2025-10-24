@@ -555,7 +555,8 @@
             <div class="intro-label text-green-700 font-bold text-lg mb-3 text-center">
               Lengkapi Identitas sebelum memulai
             </div>
-            <input id="inpPenyusun" type="text" placeholder="Masukkan nama penyusun perencanaan..." autocomplete="name"/>
+            <input id="inpSekolah" type="text" placeholder="Masukkan nama sekolah penyusun perencanaan..." autocomplete="organization"/>
+<input id="inpPenyusun" type="text" placeholder="Masukkan nama penyusun perencanaan..." autocomplete="name"/>
             <input id="inpPemberi" type="text" placeholder="Masukkan nama pemberi umpan balik/observer..." autocomplete="name"/>
             <button id="btnStartRefl" class="mt-3 w-full max-w-xs mx-auto">
               Mulai Observasi Refleksi
@@ -964,7 +965,42 @@ ${analysis}`;
         document.getElementById('intro-container').style.display = 'flex';
         
         mode = 'umpanBalik'; // Default mode
-        fadeTo('intro');
+        
+async function simpanKeGoogleSheet() {
+  // 1. Ambil nilai-nilai dari input field
+  const namaSekolah = document.getElementById('inpSekolah').value;
+  const namaPenyusun = document.getElementById('inpPenyusun').value;
+  const namaPemberi = document.getElementById('inpPemberi').value;
+  
+  // 2. BUAT object FormData
+  const formData = new FormData();
+  formData.append('namaSekolah', namaSekolah);
+  formData.append('namaPenyusun', namaPenyusun);
+  formData.append('namaPemberi', namaPemberi);
+  formData.append('mode', mode); // Asumsi 'mode' adalah variabel global
+  formData.append('skor', avgValue.textContent); // Asumsi 'avgValue' adalah DOM element
+
+  try {
+    await fetch("https://script.google.com/macros/s/AKfycbwQ-oO1NCCbz2tVoGGngT_7L1-X_zZ87ui_BlZT5tpOZy0L1pjDimIeDCPtrZKdMUPNrg/exec", {
+      method: "POST",
+      // HAPUS mode: "no-cors"
+      // HAPUS headers: { "Content-Type": "application/json" }
+      body: formData // Kirim object FormData
+    });
+    
+    console.log("Data berhasil dikirim.");
+    // ... kode lanjutan jika sukses
+    
+  } catch (err) {
+    console.error("Gagal kirim data:", err);
+    // ... kode lanjutan jika gagal
+  }
+}
+
+btnSave.onclick = () => { saveData(); simpanKeGoogleSheet(); };
+btnSaveRefl.onclick = () => { saveReflectionData(); simpanKeGoogleSheet(); };
+
+fadeTo('intro');
         updateSummaryStats();
     }
 
@@ -1439,7 +1475,33 @@ async function printReflectionDocument() {
         } else if (page === 'question' && index === 0) {
           document.getElementById('main-container').style.display = 'none';
           document.getElementById('intro-container').style.display = 'flex';
-          fadeTo('intro');
+          
+async function simpanKeGoogleSheet() {
+  const data = {
+    namaSekolah: document.getElementById('inpSekolah').value,
+    namaPenyusun: document.getElementById('inpPenyusun').value,
+    namaPemberi: document.getElementById('inpPemberi').value,
+    mode: mode,
+    skor: avgValue.textContent
+  };
+
+  try {
+    await fetch("https://script.google.com/macros/s/AKfycbwQ-oO1NCCbz2tVoGGngT_7L1-X_zZ87ui_BlZT5tpOZy0L1pjDimIeDCPtrZKdMUPNrg/exec", {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    console.log("✅ Data berhasil dikirim ke Google Sheet");
+  } catch (err) {
+    console.error("❌ Gagal kirim ke Google Sheet:", err);
+  }
+}
+
+btnSave.onclick = () => { saveData(); simpanKeGoogleSheet(); };
+btnSaveRefl.onclick = () => { saveReflectionData(); simpanKeGoogleSheet(); };
+
+fadeTo('intro');
         }
       } else if (mode === 'observasi') { // Back logic for Reflection
         if (page === 'reflection' && index > 0) {
@@ -1448,7 +1510,33 @@ async function printReflectionDocument() {
         } else if (page === 'reflection' && index === 0) {
             document.getElementById('reflection-container').style.display = 'none';
             document.getElementById('intro-container').style.display = 'flex';
-            fadeTo('intro');
+            
+async function simpanKeGoogleSheet() {
+  const data = {
+    namaSekolah: document.getElementById('inpSekolah').value,
+    namaPenyusun: document.getElementById('inpPenyusun').value,
+    namaPemberi: document.getElementById('inpPemberi').value,
+    mode: mode,
+    skor: avgValue.textContent
+  };
+
+  try {
+    await fetch("https://script.google.com/macros/s/AKfycbwQ-oO1NCCbz2tVoGGngT_7L1-X_zZ87ui_BlZT5tpOZy0L1pjDimIeDCPtrZKdMUPNrg/exec", {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    console.log("✅ Data berhasil dikirim ke Google Sheet");
+  } catch (err) {
+    console.error("❌ Gagal kirim ke Google Sheet:", err);
+  }
+}
+
+btnSave.onclick = () => { saveData(); simpanKeGoogleSheet(); };
+btnSaveRefl.onclick = () => { saveReflectionData(); simpanKeGoogleSheet(); };
+
+fadeTo('intro');
         }
       }
     };
@@ -1493,7 +1581,31 @@ async function printReflectionDocument() {
     };
 
 
-    fadeTo('intro');
+    
+async function simpanKeGoogleSheet() {
+  const formData = new FormData();
+  formData.append('namaSekolah', document.getElementById('inpSekolah').value);
+  formData.append('namaPenyusun', document.getElementById('inpPenyusun').value);
+  formData.append('namaPemberi', document.getElementById('inpPemberi').value);
+  formData.append('mode', mode);
+  formData.append('skor', avgValue.textContent);
+
+  try {
+    await fetch("https://script.google.com/macros/s/AKfycbwQ-oO1NCCbz2tVoGGngT_7L1-X_zZ87ui_BlZT5tpOZy0L1pjDimIeDCPtrZKdMUPNrg/exec", {
+      method: "POST",
+      body: formData
+    });
+    console.log("✅ Data berhasil dikirim ke Google Sheet");
+  } catch (err) {
+    console.error("❌ Gagal kirim data:", err);
+  }
+}
+
+
+btnSave.onclick = () => { saveData(); simpanKeGoogleSheet(); };
+btnSaveRefl.onclick = () => { saveReflectionData(); simpanKeGoogleSheet(); };
+
+fadeTo('intro');
     updateSummaryStats();
   </script>
 </body>

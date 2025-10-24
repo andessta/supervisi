@@ -844,7 +844,7 @@ document.addEventListener('click', (e) => {
         } else {
             headerStatsUB.style.display = 'none';
             scaleInfoUB.style.display = 'none';
-            document.querySelector('.title').textContent = 'INSTRUMEN OBSERVASI & REFLEKSI';
+            document.querySelector('.title').textContent = 'OBSERVASI & REFLEKSI';
         }
     }
 
@@ -1705,5 +1705,11 @@ btnSaveRefl.onclick = () => { saveReflectionData(); simpanKeGoogleSheet(); };
 fadeTo('intro');
     updateSummaryStats();
   </script>
+  <script>
+document.getElementById("modalPrintBtn").addEventListener("click", function() {
+  window.print(); // 🔹 membuka dialog cetak PDF
+});
+</script>
+
 </body>
 </html>
